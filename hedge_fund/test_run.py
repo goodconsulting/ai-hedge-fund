@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 from hedge_fund import run
+from hedge_fund.data import provider
 from hedge_fund.data import sessions
 from hedge_fund.fund import custom_strategy, FundSpec
 
@@ -38,8 +39,9 @@ def offline(tmp_path, monkeypatch):
     monkeypatch.setattr(run, "ensure_mandates_dir", lambda: tmp_path)
     monkeypatch.setattr(run, "Fund", build_fund)
     monkeypatch.setattr(tick_module, "Fund", build_fund)
-    monkeypatch.setattr(run, "FDClient", OfflineClient)
-    monkeypatch.setattr(run, "CachedDataClient", lambda client: client)
+    monkeypatch.setenv("HEDGE_FUND_DATA_PROVIDER", "fd")
+    monkeypatch.setattr(provider, "FDClient", OfflineClient)
+    monkeypatch.setattr(provider, "CachedDataClient", lambda client, **kw: client)
     monkeypatch.setattr(run, "PAPER_DIR", tmp_path / "paper")
     monkeypatch.setattr(run, "RESEARCH_DIR", tmp_path / "research")
 
@@ -85,7 +87,8 @@ def test_cli_rejects_invalid_configuration_before_clients(tmp_path, monkeypatch,
     monkeypatch.setattr(run, "apply_credentials", lambda: None)
     monkeypatch.setattr(run, "ensure_mandates_dir", lambda: tmp_path)
     monkeypatch.setattr(run, "Fund", forbidden)
-    monkeypatch.setattr(run, "FDClient", forbidden)
+    monkeypatch.setenv("HEDGE_FUND_DATA_PROVIDER", "fd")
+    monkeypatch.setattr(provider, "FDClient", forbidden)
     monkeypatch.setattr(run, "deploy", forbidden)
     monkeypatch.setattr(run, "PAPER_DIR", tmp_path / "paper")
     argv = (["backtest", str(path), "--universe", "AAPL"] if command == "backtest"
