@@ -1,4 +1,4 @@
-"""Load .env for v2 tests so FINANCIAL_DATASETS_API_KEY is available."""
+"""Load .env for v2 tests so the data-provider key (FINANCIAL_DATASETS_API_KEY or FMP_API_KEY) is available."""
 
 import pytest
 from dotenv import load_dotenv

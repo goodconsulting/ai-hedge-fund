@@ -16,6 +16,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
+from hedge_fund.data import provider as data_provider
 from hedge_fund.data.client import FDClientError
 from hedge_fund.llm import ChatLLM
 from hedge_fund.llm import client as client_module
@@ -279,8 +280,9 @@ def test_cli_jev_cycle_and_saved_replay(tmp_path, monkeypatch, http, capsys):
     monkeypatch.setenv("HEDGE_FUND_LLM_MODEL", "claude-opus-5")
     monkeypatch.setattr(run, "ensure_mandates_dir", lambda: tmp_path)
     monkeypatch.setattr(run, "RESEARCH_DIR", tmp_path / "research")
-    monkeypatch.setattr(run, "FDClient", lambda: FinancialFixtures(metrics=_history()))
-    monkeypatch.setattr(run, "CachedDataClient", lambda raw: raw)
+    monkeypatch.setenv("HEDGE_FUND_DATA_PROVIDER", "fd")
+    monkeypatch.setattr(data_provider, "FDClient", lambda: FinancialFixtures(metrics=_history()))
+    monkeypatch.setattr(data_provider, "CachedDataClient", lambda raw, **kw: raw)
     monkeypatch.setattr(llm_agent, "PromptCache", lambda: PromptCache(tmp_path / "llm"))
     # A backtest blinds the agents, and a blind prompt sizes the company
     # against the market-equity breakpoints table.

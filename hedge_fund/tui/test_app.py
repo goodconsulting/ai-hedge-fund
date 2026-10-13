@@ -22,6 +22,7 @@ from hedge_fund.models import Signal
 from hedge_fund.paper import Ledger
 from hedge_fund.pipeline.models import CycleRecord, DecisionRecord
 from hedge_fund.pipeline.session import SessionRecord
+from hedge_fund.data import provider
 from hedge_fund.tui import app as ui
 from hedge_fund.tui import keys
 
@@ -462,7 +463,7 @@ def test_paper_screen_runs_through_the_approval_step(monkeypatch):
     record, decided = _executed_and_decided()
     ledger.append(_session("2025-01-17", decision=decided, nav=100000))
     due = {"value": "2025-01-21"}
-    monkeypatch.setattr(ui, "FDClient", lambda: Mock(__enter__=lambda s: s, __exit__=lambda s, *a: None))
+    monkeypatch.setattr(provider, "FDClient", lambda: Mock(__enter__=lambda s: s, __exit__=lambda s, *a: None))
     monkeypatch.setattr(ui, "next_session", lambda data, benchmark, last: due["value"])
     monkeypatch.setenv("FINANCIAL_DATASETS_API_KEY", "x")
     monkeypatch.setenv("HEDGE_FUND_LLM_MODEL", "jev-1.13.0")
@@ -840,7 +841,7 @@ def test_builder_replaces_a_taken_name_only_after_yes_and_only_at_the_end():
 
 
 def test_builder_paper_mode_run_its_first_session_opens_the_approval_step(monkeypatch):
-    monkeypatch.setattr(ui, "FDClient", lambda: Mock(__enter__=lambda s: s, __exit__=lambda s, *a: None))
+    monkeypatch.setattr(provider, "FDClient", lambda: Mock(__enter__=lambda s: s, __exit__=lambda s, *a: None))
     monkeypatch.setattr(ui, "next_session", lambda data, benchmark, last: "2025-01-21")
     for variable in ("FINANCIAL_DATASETS_API_KEY", "TYPESAFE_API_KEY"):
         monkeypatch.setenv(variable, "x")
